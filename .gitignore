@@ -1,0 +1,16 @@
+.venv
+ennonce
+.ruff_cache
+.pytest_cache
+.coverage
+htmlcov
+pgdata
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+*.pyw
+*.pyz
+.env
+.coverage
+.coveragerc

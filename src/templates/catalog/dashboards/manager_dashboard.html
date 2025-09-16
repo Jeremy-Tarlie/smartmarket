@@ -1,0 +1,219 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Tableau de bord Manager - SmartMarket{% endblock %}
+
+{% block content %}
+<style>
+    .dashboard-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    .stats-card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        margin-bottom: 1.5rem;
+        overflow: hidden;
+    }
+    
+    .stats-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    }
+    
+    .stats-card .card-body {
+        padding: 1.5rem;
+        position: relative;
+    }
+    
+    .stats-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+    }
+    
+    .stats-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stats-label {
+        font-size: 0.9rem;
+        opacity: 0.8;
+        margin-bottom: 0;
+    }
+    
+    .stats-icon {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        opacity: 0.3;
+        font-size: 3rem;
+    }
+    
+    .action-card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        margin-bottom: 1.5rem;
+    }
+    
+    .action-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    }
+    
+    .action-card .card-header {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+        border-radius: 15px 15px 0 0 !important;
+        border: none;
+        padding: 1rem 1.5rem;
+    }
+    
+    .category-card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        margin-bottom: 1rem;
+        overflow: hidden;
+    }
+    
+    .category-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    }
+    
+    .category-card .card-body {
+        padding: 1.5rem;
+        text-align: center;
+    }
+    
+    .btn-modern {
+        border-radius: 25px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        border: none;
+    }
+    
+    .btn-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    
+    .welcome-text {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin-bottom: 0;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+</style>
+
+<div class="container-fluid mt-4">
+    <!-- Header moderne -->
+    <div class="dashboard-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="mb-2">
+                    <i class="fas fa-tachometer-alt me-3"></i>
+                    Tableau de bord Manager
+                </h1>
+                <p class="welcome-text">Gérez votre catalogue et vos commandes SmartMarket</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Statistiques -->
+    <div class="stats-grid">
+        <div class="card stats-card bg-primary text-white">
+            <div class="card-body">
+                <i class="fas fa-boxes stats-icon"></i>
+                <div class="stats-number">{{ total_products }}</div>
+                <div class="stats-label">Total Produits</div>
+            </div>
+        </div>
+        
+        <div class="card stats-card bg-success text-white">
+            <div class="card-body">
+                <i class="fas fa-check-circle stats-icon"></i>
+                <div class="stats-number">{{ active_products }}</div>
+                <div class="stats-label">Produits Actifs</div>
+            </div>
+        </div>
+        
+        <div class="card stats-card bg-warning text-white">
+            <div class="card-body">
+                <i class="fas fa-exclamation-triangle stats-icon"></i>
+                <div class="stats-number">{{ low_stock_products }}</div>
+                <div class="stats-label">Stock Faible</div>
+            </div>
+        </div>
+        
+        <div class="card stats-card bg-info text-white">
+            <div class="card-body">
+                <i class="fas fa-tags stats-icon"></i>
+                <div class="stats-number">{{ categories.count }}</div>
+                <div class="stats-label">Catégories</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card action-card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-bolt me-2"></i>Actions rapides
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <a href="{% url 'catalog:product_list' %}" class="btn btn-primary btn-modern w-100">
+                                <i class="fas fa-list me-2"></i>Voir les produits
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="/admin/catalog/product/add/" class="btn btn-success btn-modern w-100">
+                                <i class="fas fa-plus me-2"></i>Ajouter un produit
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="/admin/catalog/category/" class="btn btn-info btn-modern w-100">
+                                <i class="fas fa-tags me-2"></i>Gérer les catégories
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="/admin/catalog/order/" class="btn btn-warning btn-modern w-100">
+                                <i class="fas fa-shopping-cart me-2"></i>Voir les commandes
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+</div>
+{% endblock %}

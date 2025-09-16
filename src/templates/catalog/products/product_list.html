@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+
+{% block title %}Produits - SmartMarket{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-header">
+                <h5>Catégories</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    {% for category in categories %}
+                    <li class="mb-2">
+                        <a href="?category={{ category.slug }}" class="text-decoration-none">
+                            {{ category.name }}
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-9">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>Nos Produits</h1>
+            <span class="badge bg-primary">{{ products|length }} produit(s)</span>
+        </div>
+
+        {% if products %}
+            <div class="row">
+                {% for product in products %}
+                <div class="col-md-4 mb-4">
+                    <div class="card product-card h-100">
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">{{ product.name }}</h5>
+                            <p class="card-text text-muted">{{ product.category.name }}</p>
+                            <p class="card-text flex-grow-1">
+                                {% if product.description %}
+                                    {{ product.description|truncatewords:15 }}
+                                {% else %}
+                                    Aucune description disponible.
+                                {% endif %}
+                            </p>
+                            <div class="mt-auto">
+                                <p class="price h4">{{ product.price }} €</p>
+                                <p class="card-text">
+                                    <small class="text-muted">
+                                        Stock: 
+                                        <span class="{% if product.stock == 0 %}stock-low{% elif product.stock < 10 %}stock-medium{% endif %}">
+                                            {{ product.stock }}
+                                        </span>
+                                    </small>
+                                </p>
+                                <a href="{% url 'catalog:product_detail' product.slug %}" class="btn btn-primary">
+                                    Voir le produit
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Pagination -->
+            {% if is_paginated %}
+            <nav aria-label="Pagination des produits">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1">Première</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Précédente</a>
+                        </li>
+                    {% endif %}
+
+                    <li class="page-item active">
+                        <span class="page-link">
+                            Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}
+                        </span>
+                    </li>
+
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}">Suivante</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Dernière</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        {% else %}
+            <div class="text-center py-5">
+                <h3>Aucun produit trouvé</h3>
+                <p class="text-muted">Il n'y a actuellement aucun produit disponible.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

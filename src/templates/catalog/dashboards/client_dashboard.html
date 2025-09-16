@@ -1,0 +1,227 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Mon Compte - SmartMarket{% endblock %}
+
+{% block content %}
+<style>
+    .dashboard-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    .info-card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        transition: transform 0.3s ease;
+        margin-bottom: 1.5rem;
+    }
+    
+    .info-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .info-card .card-header {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        border-radius: 15px 15px 0 0 !important;
+        border: none;
+        padding: 1rem 1.5rem;
+    }
+    
+    .info-card .card-body {
+        padding: 1.5rem;
+    }
+    
+    .action-card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        margin-bottom: 1.5rem;
+    }
+    
+    .action-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    }
+    
+    .action-card .card-header {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+        border-radius: 15px 15px 0 0 !important;
+        border: none;
+        padding: 1rem 1.5rem;
+    }
+    
+    .category-card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        margin-bottom: 1rem;
+    }
+    
+    .category-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    }
+    
+    .category-card .card-body {
+        padding: 1.5rem;
+        text-align: center;
+    }
+    
+    .btn-modern {
+        border-radius: 25px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        border: none;
+    }
+    
+    .btn-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    
+    .info-item {
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .info-item:last-child {
+        border-bottom: none;
+    }
+    
+    .info-label {
+        font-weight: 600;
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+    
+    .info-value {
+        color: #2c3e50;
+        font-weight: 500;
+    }
+    
+    .order-item {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+        border-left: 4px solid #007bff;
+    }
+    
+    .welcome-text {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin-bottom: 0;
+    }
+</style>
+
+<div class="container-fluid mt-4">
+    <!-- Header moderne -->
+    <div class="dashboard-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="mb-2">
+                    <i class="fas fa-user-circle me-3"></i>
+                    Bonjour {{ user.first_name|default:user.username }} !
+                </h1>
+                <p class="welcome-text">Bienvenue sur votre espace client SmartMarket</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Informations utilisateur -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card info-card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-user-circle me-2"></i>Mes informations
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="info-item">
+                        <div class="info-label">Nom complet</div>
+                        <div class="info-value">{{ user.first_name }} {{ user.last_name }}</div>
+                    </div>
+                    
+                    <div class="info-item">
+                        <div class="info-label">Email</div>
+                        <div class="info-value">{{ user.email }}</div>
+                    </div>
+                    
+                    {% if user.phone %}
+                    <div class="info-item">
+                        <div class="info-label">Téléphone</div>
+                        <div class="info-value">{{ user.phone }}</div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if user.address %}
+                    <div class="info-item">
+                        <div class="info-label">Adresse</div>
+                        <div class="info-value">{{ user.address }}</div>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="info-item">
+                        <div class="info-label">Membre depuis</div>
+                        <div class="info-value">{{ user.date_joined|date:"d/m/Y" }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card info-card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-shopping-cart me-2"></i>Mes commandes
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if user_orders %}
+                        <p class="text-muted mb-3">Vos dernières commandes :</p>
+                        {% for order in user_orders %}
+                        <div class="order-item">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="fw-bold">Commande #{{ order.id }}</span>
+                                <span class="badge bg-primary">{{ order.status }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between text-muted">
+                                <small>{{ order.created_at|date:"d/m/Y H:i" }}</small>
+                                <small class="fw-bold">{{ order.total_price }}€</small>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        <div class="text-center mt-3">
+                            <a href="/admin/catalog/order/?user__id={{ user.id }}" class="btn btn-primary btn-modern">
+                                <i class="fas fa-list me-2"></i>Voir toutes mes commandes
+                            </a>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
+                            <p class="text-muted mb-3">Vous n'avez pas encore passé de commande.</p>
+                            <a href="{% url 'catalog:product_list' %}" class="btn btn-primary btn-modern">
+                                <i class="fas fa-shopping-bag me-2"></i>Découvrir nos produits
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    
+</div>
+{% endblock %}

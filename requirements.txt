@@ -1,0 +1,12 @@
+django>=4.2
+psycopg2-binary
+django-debug-toolbar
+djangorestframework>=3.14.0
+django-cors-headers>=4.0.0
+drf-spectacular>=0.26.0
+django-filter>=23.0
+pytest
+pytest-django
+pytest-cov
+black
+ruff

@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ product.name }} - SmartMarket{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'catalog:product_list' %}">Produits</a></li>
+                <li class="breadcrumb-item"><a href="?category={{ product.category.slug }}">{{ product.category.name }}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ product.name }}</li>
+            </ol>
+        </nav>
+
+        <div class="card">
+            <div class="card-body">
+                <h1 class="card-title">{{ product.name }}</h1>
+                <p class="text-muted">
+                    <span class="badge bg-secondary">{{ product.category.name }}</span>
+                </p>
+                
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <h3 class="price text-success">{{ product.price }} €</h3>
+                        <p class="card-text">
+                            <strong>Stock disponible:</strong>
+                            <span class="{% if product.stock == 0 %}text-danger{% elif product.stock < 10 %}text-warning{% else %}text-success{% endif %}">
+                                {{ product.stock }} unité(s)
+                            </span>
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        {% if product.stock > 0 %}
+                            <button class="btn btn-success btn-lg" disabled>
+                                Ajouter au panier
+                            </button>
+                        {% else %}
+                            <button class="btn btn-secondary btn-lg" disabled>
+                                Rupture de stock
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if product.description %}
+                <hr>
+                <h4>Description</h4>
+                <p class="card-text">{{ product.description|linebreaks }}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>Informations produit</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-sm">
+                    <tr>
+                        <td><strong>Catégorie:</strong></td>
+                        <td>{{ product.category.name }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Prix:</strong></td>
+                        <td class="price">{{ product.price }} €</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Stock:</strong></td>
+                        <td>
+                            <span class="{% if product.stock == 0 %}text-danger{% elif product.stock < 10 %}text-warning{% else %}text-success{% endif %}">
+                                {{ product.stock }} unité(s)
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Ajouté le:</strong></td>
+                        <td>{{ product.created_at|date:"d/m/Y à H:i" }}</td>
+                    </tr>
+                    {% if product.updated_at != product.created_at %}
+                    <tr>
+                        <td><strong>Modifié le:</strong></td>
+                        <td>{{ product.updated_at|date:"d/m/Y à H:i" }}</td>
+                    </tr>
+                    {% endif %}
+                </table>
+            </div>
+        </div>
+
+        {% if related_products %}
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5>Produits similaires</h5>
+            </div>
+            <div class="card-body">
+                {% for related_product in related_products %}
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div>
+                        <a href="{% url 'catalog:product_detail' related_product.slug %}" class="text-decoration-none">
+                            {{ related_product.name }}
+                        </a>
+                        <br>
+                        <small class="text-muted">{{ related_product.price }} €</small>
+                    </div>
+                </div>
+                {% if not forloop.last %}<hr class="my-2">{% endif %}
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

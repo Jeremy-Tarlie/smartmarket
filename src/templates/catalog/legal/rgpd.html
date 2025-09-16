@@ -1,0 +1,411 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}RGPD & Politique de Confidentialité - SmartMarket{% endblock %}
+
+{% block extra_css %}
+<style>
+    .rgpd-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 2rem;
+        background: #fff;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        margin-top: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .rgpd-header {
+        text-align: center;
+        margin-bottom: 3rem;
+        padding: 2rem 0;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        margin: -2rem -2rem 3rem -2rem;
+    }
+    
+    .rgpd-header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    
+    .rgpd-header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+    }
+    
+    .section {
+        margin-bottom: 3rem;
+        padding: 2rem;
+        background: #f8f9fa;
+        border-radius: 10px;
+        border-left: 5px solid #667eea;
+    }
+    
+    .section h2 {
+        color: #2c3e50;
+        font-size: 1.8rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+    }
+    
+    .section h2 i {
+        margin-right: 0.5rem;
+        color: #667eea;
+    }
+    
+    .section h3 {
+        color: #34495e;
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+    }
+    
+    .section p, .section li {
+        line-height: 1.7;
+        color: #555;
+        margin-bottom: 1rem;
+    }
+    
+    .section ul {
+        padding-left: 1.5rem;
+    }
+    
+    .section li {
+        margin-bottom: 0.5rem;
+    }
+    
+    .highlight-box {
+        background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+        border: 2px solid #667eea;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+    }
+    
+    .highlight-box h4 {
+        color: #667eea;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+    
+    .contact-info {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 10px;
+        text-align: center;
+        margin-top: 2rem;
+    }
+    
+    .contact-info h3 {
+        color: white;
+        margin-bottom: 1rem;
+    }
+    
+    .contact-info a {
+        color: #ffd700;
+        text-decoration: none;
+        font-weight: 600;
+    }
+    
+    .contact-info a:hover {
+        text-decoration: underline;
+    }
+    
+    .toc {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .toc h3 {
+        color: #2c3e50;
+        margin-bottom: 1rem;
+    }
+    
+    .toc ul {
+        list-style: none;
+        padding: 0;
+    }
+    
+    .toc li {
+        margin-bottom: 0.5rem;
+    }
+    
+    .toc a {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 500;
+    }
+    
+    .toc a:hover {
+        text-decoration: underline;
+    }
+    
+    .last-updated {
+        text-align: center;
+        color: #666;
+        font-style: italic;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid #eee;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="rgpd-container">
+    <div class="rgpd-header">
+        <h1><i class="fas fa-shield-alt"></i> RGPD & Politique de Confidentialité</h1>
+        <p>Protection de vos données personnelles et respect de votre vie privée</p>
+    </div>
+    
+    <div class="toc">
+        <h3><i class="fas fa-list"></i> Table des matières</h3>
+        <ul>
+            <li><a href="#collecte">1. Collecte des données</a></li>
+            <li><a href="#utilisation">2. Utilisation des données</a></li>
+            <li><a href="#partage">3. Partage des données</a></li>
+            <li><a href="#droits">4. Vos droits RGPD</a></li>
+            <li><a href="#securite">5. Sécurité des données</a></li>
+            <li><a href="#cookies">6. Cookies et technologies similaires</a></li>
+            <li><a href="#retention">7. Conservation des données</a></li>
+            <li><a href="#contact">8. Contact et réclamations</a></li>
+        </ul>
+    </div>
+    
+    <div class="section" id="collecte">
+        <h2><i class="fas fa-database"></i> 1. Collecte des données personnelles</h2>
+        
+        <h3>Données collectées automatiquement</h3>
+        <p>Lors de votre visite sur notre site, nous collectons automatiquement certaines informations :</p>
+        <ul>
+            <li><strong>Données de navigation :</strong> adresse IP, type de navigateur, pages visitées, durée de visite</li>
+            <li><strong>Cookies techniques :</strong> nécessaires au fonctionnement du site</li>
+            <li><strong>Données de performance :</strong> pour améliorer l'expérience utilisateur</li>
+        </ul>
+        
+        <h3>Données collectées lors de l'inscription</h3>
+        <p>Pour créer votre compte et passer des commandes, nous collectons :</p>
+        <ul>
+            <li><strong>Identité :</strong> nom, prénom, adresse e-mail</li>
+            <li><strong>Contact :</strong> numéro de téléphone, adresse de livraison</li>
+            <li><strong>Authentification :</strong> mot de passe (chiffré)</li>
+            <li><strong>Consentement RGPD :</strong> date et heure de votre consentement</li>
+        </ul>
+        
+        <div class="highlight-box">
+            <h4><i class="fas fa-info-circle"></i> Base légale</h4>
+            <p>La collecte de vos données repose sur :</p>
+            <ul>
+                <li><strong>Exécution du contrat :</strong> pour la fourniture de nos services</li>
+                <li><strong>Intérêt légitime :</strong> pour la sécurité et l'amélioration du site</li>
+                <li><strong>Consentement :</strong> pour les cookies non essentiels et la communication marketing</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="section" id="utilisation">
+        <h2><i class="fas fa-cogs"></i> 2. Utilisation des données personnelles</h2>
+        
+        <h3>Finalités principales</h3>
+        <ul>
+            <li><strong>Gestion des commandes :</strong> traitement, expédition et suivi de vos commandes</li>
+            <li><strong>Service client :</strong> réponse à vos demandes et support technique</li>
+            <li><strong>Comptes utilisateurs :</strong> création, gestion et sécurisation de votre compte</li>
+            <li><strong>Facturation :</strong> émission de factures et gestion des paiements</li>
+        </ul>
+        
+        <h3>Finalités secondaires</h3>
+        <ul>
+            <li><strong>Amélioration du service :</strong> analyse des données pour optimiser notre site</li>
+            <li><strong>Communication :</strong> envoi d'informations sur nos produits (avec votre consentement)</li>
+            <li><strong>Sécurité :</strong> prévention de la fraude et protection de nos utilisateurs</li>
+            <li><strong>Obligations légales :</strong> respect des réglementations comptables et fiscales</li>
+        </ul>
+    </div>
+    
+    <div class="section" id="partage">
+        <h2><i class="fas fa-share-alt"></i> 3. Partage des données personnelles</h2>
+        
+        <p>Vos données personnelles ne sont <strong>jamais vendues</strong> à des tiers. Elles peuvent être partagées uniquement dans les cas suivants :</p>
+        
+        <h3>Prestataires de services</h3>
+        <ul>
+            <li><strong>Transporteurs :</strong> pour la livraison de vos commandes</li>
+            <li><strong>Processeurs de paiement :</strong> pour le traitement sécurisé des transactions</li>
+            <li><strong>Hébergeur :</strong> pour l'hébergement sécurisé de nos données</li>
+        </ul>
+        
+        <h3>Obligations légales</h3>
+        <ul>
+            <li><strong>Autorités compétentes :</strong> en cas de demande légale ou d'enquête</li>
+            <li><strong>Protection des droits :</strong> pour défendre nos droits ou ceux de nos utilisateurs</li>
+        </ul>
+        
+        <div class="highlight-box">
+            <h4><i class="fas fa-lock"></i> Garanties</h4>
+            <p>Tous nos partenaires s'engagent contractuellement à :</p>
+            <ul>
+                <li>Respecter le RGPD et la confidentialité de vos données</li>
+                <li>Utiliser vos données uniquement pour les finalités convenues</li>
+                <li>Mettre en place des mesures de sécurité appropriées</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="section" id="droits">
+        <h2><i class="fas fa-user-shield"></i> 4. Vos droits RGPD</h2>
+        
+        <p>Conformément au Règlement Général sur la Protection des Données (RGPD), vous disposez des droits suivants :</p>
+        
+        <h3>Droits d'accès et de rectification</h3>
+        <ul>
+            <li><strong>Droit d'accès :</strong> obtenir une copie de vos données personnelles</li>
+            <li><strong>Droit de rectification :</strong> corriger des données inexactes ou incomplètes</li>
+            <li><strong>Droit de mise à jour :</strong> modifier vos informations personnelles</li>
+        </ul>
+        
+        <h3>Droits de suppression et de limitation</h3>
+        <ul>
+            <li><strong>Droit à l'effacement :</strong> demander la suppression de vos données</li>
+            <li><strong>Droit à la limitation :</strong> restreindre le traitement de vos données</li>
+            <li><strong>Droit d'opposition :</strong> vous opposer au traitement de vos données</li>
+        </ul>
+        
+        <h3>Droits de portabilité et de retrait du consentement</h3>
+        <ul>
+            <li><strong>Droit à la portabilité :</strong> récupérer vos données dans un format structuré</li>
+            <li><strong>Retrait du consentement :</strong> retirer votre consentement à tout moment</li>
+        </ul>
+        
+        <div class="highlight-box">
+            <h4><i class="fas fa-download"></i> Exercer vos droits</h4>
+            <p>Vous pouvez exercer vos droits de plusieurs façons :</p>
+            <ul>
+                <li><strong>Via votre compte :</strong> modifier vos informations dans votre espace personnel</li>
+                <li><strong>Via l'API :</strong> utiliser nos endpoints RGPD pour l'export et la suppression</li>
+                <li><strong>Par e-mail :</strong> contacter notre DPO à l'adresse indiquée ci-dessous</li>
+            </ul>
+            <p><strong>Délai de réponse :</strong> Nous nous engageons à répondre à votre demande dans un délai maximum de 30 jours.</p>
+        </div>
+    </div>
+    
+    <div class="section" id="securite">
+        <h2><i class="fas fa-shield-alt"></i> 5. Sécurité des données</h2>
+        
+        <h3>Mesures techniques</h3>
+        <ul>
+            <li><strong>Chiffrement :</strong> toutes les données sensibles sont chiffrées (SSL/TLS)</li>
+            <li><strong>Authentification :</strong> mots de passe sécurisés et authentification forte</li>
+            <li><strong>Accès restreint :</strong> accès aux données limité aux personnes autorisées</li>
+            <li><strong>Sauvegardes :</strong> sauvegardes régulières et sécurisées</li>
+        </ul>
+        
+        <h3>Mesures organisationnelles</h3>
+        <ul>
+            <li><strong>Formation :</strong> sensibilisation de nos équipes à la protection des données</li>
+            <li><strong>Audits :</strong> contrôles réguliers de nos systèmes de sécurité</li>
+            <li><strong>Incident response :</strong> procédure en cas de violation de données</li>
+        </ul>
+        
+        <div class="highlight-box">
+            <h4><i class="fas fa-exclamation-triangle"></i> Notification de violation</h4>
+            <p>En cas de violation de données susceptible d'engendrer un risque élevé pour vos droits et libertés, nous nous engageons à :</p>
+            <ul>
+                <li>Notifier la CNIL dans les 72 heures</li>
+                <li>Vous informer dans les meilleurs délais</li>
+                <li>Prendre toutes les mesures nécessaires pour limiter les conséquences</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="section" id="cookies">
+        <h2><i class="fas fa-cookie-bite"></i> 6. Cookies et technologies similaires</h2>
+        
+        <h3>Types de cookies utilisés</h3>
+        <ul>
+            <li><strong>Cookies essentiels :</strong> nécessaires au fonctionnement du site (panier, authentification)</li>
+            <li><strong>Cookies de performance :</strong> pour analyser l'utilisation du site et l'améliorer</li>
+            <li><strong>Cookies de fonctionnalité :</strong> pour mémoriser vos préférences</li>
+            <li><strong>Cookies de ciblage :</strong> pour personnaliser votre expérience (avec votre consentement)</li>
+        </ul>
+        
+        <h3>Gestion des cookies</h3>
+        <p>Vous pouvez gérer vos préférences de cookies :</p>
+        <ul>
+            <li><strong>Paramètres du navigateur :</strong> bloquer ou supprimer les cookies</li>
+            <li><strong>Bannière de consentement :</strong> choisir les cookies acceptés</li>
+            <li><strong>Outils de désactivation :</strong> utiliser les outils de désactivation publicitaire</li>
+        </ul>
+        
+        <div class="highlight-box">
+            <h4><i class="fas fa-info-circle"></i> Impact de la désactivation</h4>
+            <p>La désactivation de certains cookies peut affecter :</p>
+            <ul>
+                <li>Le fonctionnement de votre panier d'achat</li>
+                <li>La mémorisation de vos préférences</li>
+                <li>La personnalisation de votre expérience</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="section" id="retention">
+        <h2><i class="fas fa-clock"></i> 7. Conservation des données</h2>
+        
+        <h3>Durées de conservation</h3>
+        <ul>
+            <li><strong>Données de compte :</strong> conservées tant que votre compte est actif</li>
+            <li><strong>Données de commande :</strong> conservées 10 ans pour obligations comptables</li>
+            <li><strong>Données de navigation :</strong> conservées 13 mois maximum</li>
+            <li><strong>Données marketing :</strong> conservées jusqu'au retrait de votre consentement</li>
+        </ul>
+        
+        <h3>Critères de conservation</h3>
+        <ul>
+            <li><strong>Finalité :</strong> conservation nécessaire à la finalité pour laquelle les données ont été collectées</li>
+            <li><strong>Obligations légales :</strong> respect des délais légaux de conservation</li>
+            <li><strong>Intérêt légitime :</strong> conservation justifiée par nos intérêts légitimes</li>
+        </ul>
+    </div>
+    
+    <div class="section" id="contact">
+        <h2><i class="fas fa-envelope"></i> 8. Contact et réclamations</h2>
+        
+        <h3>Délégué à la Protection des Données (DPO)</h3>
+        <p>Pour toute question relative à la protection de vos données personnelles :</p>
+        <ul>
+            <li><strong>E-mail :</strong> dpo@smartmarket.com</li>
+            <li><strong>Téléphone :</strong> +33 1 23 45 67 89</li>
+            <li><strong>Adresse :</strong> 123 Rue de la Protection, 75001 Paris, France</li>
+        </ul>
+        
+        <h3>Réclamations</h3>
+        <p>Si vous estimez que vos droits ne sont pas respectés, vous pouvez :</p>
+        <ul>
+            <li><strong>Nous contacter :</strong> nous nous engageons à examiner votre réclamation</li>
+            <li><strong>Saisir la CNIL :</strong> Commission Nationale de l'Informatique et des Libertés</li>
+            <li><strong>Recours juridictionnel :</strong> saisir les tribunaux compétents</li>
+        </ul>
+        
+        <div class="contact-info">
+            <h3><i class="fas fa-headset"></i> Besoin d'aide ?</h3>
+            <p>Notre équipe est à votre disposition pour toute question concernant vos données personnelles.</p>
+            <p>Contactez-nous : <a href="mailto:contact@smartmarket.com">contact@smartmarket.com</a></p>
+        </div>
+    </div>
+    
+    <div class="last-updated">
+        <p><i class="fas fa-calendar-alt"></i> Dernière mise à jour : {{ "now"|date:"d F Y" }}</p>
+        <p>Cette politique de confidentialité peut être modifiée. Nous vous informerons de tout changement significatif.</p>
+    </div>
+</div>
+{% endblock %}
