@@ -1,0 +1,145 @@
+{
+  "description": "Jeu de tests de pertinence pour l'évaluation des fonctionnalités ML",
+  "version": "1.0.0",
+  "created_at": "2024-01-15",
+  "test_cases": {
+    "recommendations": [
+      {
+        "product_id": 1,
+        "product_name": "Smartphone Samsung Galaxy",
+        "expected_similar_products": [
+          {
+            "product_id": 2,
+            "product_name": "iPhone 15",
+            "reason": "Produits électroniques similaires - smartphones"
+          },
+          {
+            "product_id": 3,
+            "product_name": "Samsung Galaxy Tab",
+            "reason": "Même marque Samsung"
+          }
+        ]
+      },
+      {
+        "product_id": 4,
+        "product_name": "T-shirt coton bio",
+        "expected_similar_products": [
+          {
+            "product_id": 5,
+            "product_name": "Polo coton",
+            "reason": "Vêtements en coton"
+          },
+          {
+            "product_id": 6,
+            "product_name": "Chemise bio",
+            "reason": "Vêtements bio"
+          }
+        ]
+      }
+    ],
+    "search_queries": [
+      {
+        "query": "smartphone",
+        "expected_products": [
+          {
+            "product_id": 1,
+            "product_name": "Smartphone Samsung Galaxy",
+            "min_score": 0.7
+          },
+          {
+            "product_id": 2,
+            "product_name": "iPhone 15",
+            "min_score": 0.7
+          }
+        ]
+      },
+      {
+        "query": "vêtement coton",
+        "expected_products": [
+          {
+            "product_id": 4,
+            "product_name": "T-shirt coton bio",
+            "min_score": 0.8
+          },
+          {
+            "product_id": 5,
+            "product_name": "Polo coton",
+            "min_score": 0.8
+          }
+        ]
+      },
+      {
+        "query": "écran AMOLED",
+        "expected_products": [
+          {
+            "product_id": 1,
+            "product_name": "Smartphone Samsung Galaxy",
+            "min_score": 0.9
+          }
+        ]
+      }
+    ],
+    "rag_questions": [
+      {
+        "question": "Quelle est votre politique de retour ?",
+        "expected_answer_contains": ["30 jours", "retour", "remboursement"],
+        "expected_sources": ["policy", "returns"]
+      },
+      {
+        "question": "Comment fonctionne la livraison ?",
+        "expected_answer_contains": ["livraison", "délai", "frais"],
+        "expected_sources": ["policy", "shipping"]
+      },
+      {
+        "question": "Quels sont les délais de livraison ?",
+        "expected_answer_contains": ["3-5 jours", "express", "standard"],
+        "expected_sources": ["policy", "shipping"]
+      },
+      {
+        "question": "Comment choisir la bonne taille de vêtement ?",
+        "expected_answer_contains": ["guide des tailles", "composition", "entretien"],
+        "expected_sources": ["guide", "fashion"]
+      },
+      {
+        "question": "Quelle est la garantie des produits électroniques ?",
+        "expected_answer_contains": ["2 ans", "garantie", "constructeur"],
+        "expected_sources": ["guide", "electronics"]
+      }
+    ]
+  },
+  "evaluation_metrics": {
+    "recommendations": {
+      "precision_at_5": 0.6,
+      "precision_at_10": 0.5,
+      "recall_at_10": 0.4,
+      "ndcg_at_10": 0.7
+    },
+    "search": {
+      "precision_at_10": 0.6,
+      "recall_at_10": 0.5,
+      "mrr": 0.7,
+      "ndcg_at_10": 0.8
+    },
+    "rag": {
+      "answerability": 0.8,
+      "factual_accuracy": 0.9,
+      "source_relevance": 0.8,
+      "response_time_ms": 2000
+    }
+  },
+  "performance_targets": {
+    "recommendations": {
+      "p95_latency_ms": 150,
+      "cache_hit_rate": 0.8
+    },
+    "search": {
+      "p95_latency_ms": 300,
+      "cache_hit_rate": 0.7
+    },
+    "rag": {
+      "p95_latency_ms": 2000,
+      "cache_hit_rate": 0.5
+    }
+  }
+}
+

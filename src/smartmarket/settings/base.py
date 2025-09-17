@@ -121,6 +121,7 @@ REST_FRAMEWORK = {
         "anon": "60/min",
         "user": "120/min",
         "sensitive": "10/min",
+        "ml_requests": "30/min",  # Throttling spécifique pour les endpoints ML
     },
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_RENDERER_CLASSES": [
@@ -150,6 +151,21 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 CORS_ALLOW_CREDENTIALS = True
+
+# Configuration Redis pour le cache ML
+REDIS_CONFIG = {
+    "HOST": os.getenv("REDIS_HOST", "localhost"),
+    "PORT": int(os.getenv("REDIS_PORT", "6379")),
+    "DB": int(os.getenv("REDIS_DB", "0")),
+}
+
+# Configuration des performances ML
+ML_PERFORMANCE_CONFIG = {
+    "RECOMMENDATION_TIMEOUT": 0.15,  # 150ms
+    "SEARCH_TIMEOUT": 0.3,  # 300ms
+    "RAG_TIMEOUT": 2.0,  # 2s
+    "CACHE_TTL": 3600,  # 1 heure
+}
 
 LOGGING = {
     "version": 1,
