@@ -1,0 +1,108 @@
+version: '3.8'
+
+services:
+  # Base de données PostgreSQL
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: smartmarket_dev
+      POSTGRES_USER: smartmarket
+      POSTGRES_PASSWORD: dev_password
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - smartmarket_dev_network
+
+  # Redis pour cache et Celery
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_dev_data:/data
+    networks:
+      - smartmarket_dev_network
+
+  # Application web Django (développement)
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    environment:
+      - DJANGO_SETTINGS_MODULE=smartmarket.settings.dev
+      - SECRET_KEY=dev-secret-key-not-for-production
+      - DEBUG=True
+      - ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0
+      - DATABASE_URL=postgresql://smartmarket:dev_password@db:5432/smartmarket_dev
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/1
+      - CELERY_RESULT_BACKEND=redis://redis:6379/1
+    volumes:
+      - ./src:/app/src
+      - static_dev_volume:/app/static
+      - media_dev_volume:/app/media
+    ports:
+      - "8000:8000"
+    networks:
+      - smartmarket_dev_network
+    depends_on:
+      - db
+      - redis
+    command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+
+  # Worker Celery (développement)
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    environment:
+      - DJANGO_SETTINGS_MODULE=smartmarket.settings.dev
+      - SECRET_KEY=dev-secret-key-not-for-production
+      - DEBUG=True
+      - DATABASE_URL=postgresql://smartmarket:dev_password@db:5432/smartmarket_dev
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/1
+      - CELERY_RESULT_BACKEND=redis://redis:6379/1
+    volumes:
+      - ./src:/app/src
+    networks:
+      - smartmarket_dev_network
+    depends_on:
+      - db
+      - redis
+    command: ["celery", "-A", "smartmarket", "worker", "--loglevel=debug", "--concurrency=1"]
+
+  # Celery Beat (développement)
+  beat:
+    build:
+      context: .
+      dockerfile: Dockerfile.beat
+    environment:
+      - DJANGO_SETTINGS_MODULE=smartmarket.settings.dev
+      - SECRET_KEY=dev-secret-key-not-for-production
+      - DEBUG=True
+      - DATABASE_URL=postgresql://smartmarket:dev_password@db:5432/smartmarket_dev
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/1
+      - CELERY_RESULT_BACKEND=redis://redis:6379/1
+    volumes:
+      - ./src:/app/src
+    networks:
+      - smartmarket_dev_network
+    depends_on:
+      - db
+      - redis
+    command: ["celery", "-A", "smartmarket", "beat", "--loglevel=debug"]
+
+volumes:
+  postgres_dev_data:
+  redis_dev_data:
+  static_dev_volume:
+  media_dev_volume:
+
+networks:
+  smartmarket_dev_network:
+    driver: bridge
+

@@ -23,3 +23,15 @@ django-redis>=5.2.0
 openai>=1.0.0
 # Utilitaires
 python-dotenv>=1.0.0
+# Asynchrone et temps réel
+celery>=5.3.0
+django-celery-beat>=2.5.0
+channels>=4.0.0
+channels-redis>=4.1.0
+# Serveur de production
+gunicorn>=21.0.0
+uvicorn>=0.24.0
+# Conteneurisation
+docker>=6.0.0
+# CI/CD et sécurité
+trivy>=0.45.0

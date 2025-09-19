@@ -408,3 +408,4 @@ class MLManifestTestCase(TestCase):
         self.assertIsInstance(summary['total_models'], int)
         self.assertIsInstance(summary['total_indexes'], int)
 
+

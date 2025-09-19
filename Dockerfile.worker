@@ -1,0 +1,54 @@
+# Dockerfile pour le worker Celery SmartMarket
+FROM python:3.11-slim as base
+
+# Variables d'environnement
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
+
+# Créer un utilisateur non-root
+RUN groupadd --gid 1000 smartmarket && \
+    useradd --uid 1000 --gid smartmarket --shell /bin/bash --create-home smartmarket
+
+# Installer les dépendances système
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libpq-dev \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Stage de build
+FROM base as builder
+
+# Installer les dépendances Python
+COPY requirements.txt /tmp/requirements.txt
+RUN pip install --user --no-cache-dir -r /tmp/requirements.txt
+
+# Stage de production
+FROM base as production
+
+# Copier les dépendances Python depuis le stage de build
+COPY --from=builder /root/.local /home/smartmarket/.local
+
+# Ajouter le répertoire des dépendances au PATH
+ENV PATH=/home/smartmarket/.local/bin:$PATH
+
+# Créer les répertoires nécessaires
+RUN mkdir -p /app/logs && \
+    chown -R smartmarket:smartmarket /app
+
+# Copier le code de l'application
+COPY --chown=smartmarket:smartmarket src/ /app/src/
+WORKDIR /app/src
+
+# Changer vers l'utilisateur non-root
+USER smartmarket
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
+    CMD celery -A smartmarket inspect ping || exit 1
+
+# Commande par défaut
+CMD ["celery", "-A", "smartmarket", "worker", "--loglevel=info", "--concurrency=2", "--queues=default,ml,emails,maintenance,reports"]
+

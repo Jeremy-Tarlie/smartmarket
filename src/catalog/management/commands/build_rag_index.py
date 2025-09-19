@@ -245,3 +245,5 @@ class Command(BaseCommand):
             )
             self._create_demo_documents(rag_assistant)
 
+
+

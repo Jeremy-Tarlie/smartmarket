@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tableau de bord Admin - SmartMarket</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-connected { background-color: #4CAF50; }
+        .status-disconnected { background-color: #f44336; }
+        .status-connecting { background-color: #ff9800; }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .card-header {
+            background: #2196F3;
+            color: white;
+            padding: 15px 20px;
+            font-weight: 600;
+        }
+        
+        .card-body {
+            padding: 20px;
+        }
+        
+        .order-item {
+            border-bottom: 1px solid #eee;
+            padding: 15px 0;
+        }
+        
+        .order-item:last-child {
+            border-bottom: none;
+        }
+        
+        .order-id {
+            font-weight: 600;
+            color: #2196F3;
+        }
+        
+        .order-user {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .order-product {
+            margin: 5px 0;
+        }
+        
+        .order-price {
+            font-weight: 600;
+            color: #4CAF50;
+        }
+        
+        .notification-item {
+            background: #f8f9fa;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+        
+        .notification-time {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .ml-task-item {
+            background: #e8f5e8;
+            border-left: 4px solid #4CAF50;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+        
+        .ml-task-failed {
+            background: #ffeaea;
+            border-left-color: #f44336;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2em;
+            font-weight: 600;
+            color: #2196F3;
+        }
+        
+        .stat-label {
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .btn {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        
+        .btn:hover {
+            background: #1976D2;
+        }
+        
+        .btn-danger {
+            background: #f44336;
+        }
+        
+        .btn-danger:hover {
+            background: #d32f2f;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Tableau de bord Admin - SmartMarket</h1>
+            <p>
+                <span class="status-indicator" id="connectionStatus"></span>
+                <span id="connectionText">Connexion en cours...</span>
+            </p>
+            <div>
+                <button class="btn" onclick="testConnection()">Tester la connexion</button>
+                <button class="btn" onclick="getRecentOrders()">Actualiser les commandes</button>
+                <button class="btn btn-danger" onclick="disconnect()">Déconnecter</button>
+            </div>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="totalOrders">0</div>
+                <div class="stat-label">Commandes totales</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="todayOrders">0</div>
+                <div class="stat-label">Commandes aujourd'hui</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="activeUsers">0</div>
+                <div class="stat-label">Utilisateurs actifs</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="mlTasks">0</div>
+                <div class="stat-label">Tâches ML</div>
+            </div>
+        </div>
+        
+        <div class="dashboard-grid">
+            <div class="card">
+                <div class="card-header">
+                    Commandes récentes
+                </div>
+                <div class="card-body">
+                    <div id="ordersList">
+                        <p>Chargement des commandes...</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    Notifications système
+                </div>
+                <div class="card-body">
+                    <div id="notificationsList">
+                        <p>En attente de notifications...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let socket = null;
+        let reconnectAttempts = 0;
+        const maxReconnectAttempts = 5;
+        let reconnectTimeout = null;
+        
+        // Éléments DOM
+        const connectionStatus = document.getElementById('connectionStatus');
+        const connectionText = document.getElementById('connectionText');
+        const ordersList = document.getElementById('ordersList');
+        const notificationsList = document.getElementById('notificationsList');
+        
+        // Statistiques
+        let stats = {
+            totalOrders: 0,
+            todayOrders: 0,
+            activeUsers: 0,
+            mlTasks: 0
+        };
+        
+        function connect() {
+            if (socket && socket.readyState === WebSocket.OPEN) {
+                return;
+            }
+            
+            updateConnectionStatus('connecting', 'Connexion en cours...');
+            
+            // Construire l'URL WebSocket
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${protocol}//${window.location.host}/ws/admin/orders/`;
+            
+            socket = new WebSocket(wsUrl);
+            
+            socket.onopen = function(event) {
+                console.log('WebSocket connecté');
+                updateConnectionStatus('connected', 'Connecté');
+                reconnectAttempts = 0;
+                
+                // Demander les commandes récentes
+                getRecentOrders();
+            };
+            
+            socket.onmessage = function(event) {
+                const data = JSON.parse(event.data);
+                handleMessage(data);
+            };
+            
+            socket.onclose = function(event) {
+                console.log('WebSocket fermé');
+                updateConnectionStatus('disconnected', 'Déconnecté');
+                
+                // Tentative de reconnexion
+                if (reconnectAttempts < maxReconnectAttempts) {
+                    reconnectAttempts++;
+                    const delay = Math.min(1000 * Math.pow(2, reconnectAttempts), 30000);
+                    console.log(`Tentative de reconnexion ${reconnectAttempts}/${maxReconnectAttempts} dans ${delay}ms`);
+                    
+                    reconnectTimeout = setTimeout(() => {
+                        connect();
+                    }, delay);
+                }
+            };
+            
+            socket.onerror = function(error) {
+                console.error('Erreur WebSocket:', error);
+                updateConnectionStatus('disconnected', 'Erreur de connexion');
+            };
+        }
+        
+        function updateConnectionStatus(status, text) {
+            connectionStatus.className = `status-indicator status-${status}`;
+            connectionText.textContent = text;
+        }
+        
+        function handleMessage(data) {
+            console.log('Message reçu:', data);
+            
+            switch(data.type) {
+                case 'connection_established':
+                    console.log('Connexion établie');
+                    break;
+                    
+                case 'order_created':
+                    addNewOrder(data.order);
+                    stats.todayOrders++;
+                    updateStats();
+                    break;
+                    
+                case 'order_updated':
+                    updateOrder(data.order);
+                    break;
+                    
+                case 'system_notification':
+                    addNotification(data.notification);
+                    break;
+                    
+                case 'ml_task_completed':
+                    addMLTaskNotification(data.task);
+                    stats.mlTasks++;
+                    updateStats();
+                    break;
+                    
+                case 'recent_orders':
+                    displayRecentOrders(data.orders);
+                    break;
+                    
+                case 'pong':
+                    console.log('Pong reçu');
+                    break;
+                    
+                default:
+                    console.log('Type de message non géré:', data.type);
+            }
+        }
+        
+        function addNewOrder(order) {
+            const orderElement = createOrderElement(order);
+            ordersList.insertBefore(orderElement, ordersList.firstChild);
+            
+            // Limiter à 10 commandes affichées
+            const orders = ordersList.querySelectorAll('.order-item');
+            if (orders.length > 10) {
+                ordersList.removeChild(orders[orders.length - 1]);
+            }
+            
+            // Ajouter une notification
+            addNotification({
+                type: 'new_order',
+                message: `Nouvelle commande #${order.id} de ${order.user.username}`,
+                order_id: order.id
+            });
+        }
+        
+        function updateOrder(order) {
+            const existingOrder = document.querySelector(`[data-order-id="${order.id}"]`);
+            if (existingOrder) {
+                existingOrder.innerHTML = formatOrderHTML(order);
+            }
+        }
+        
+        function createOrderElement(order) {
+            const div = document.createElement('div');
+            div.className = 'order-item';
+            div.setAttribute('data-order-id', order.id);
+            div.innerHTML = formatOrderHTML(order);
+            return div;
+        }
+        
+        function formatOrderHTML(order) {
+            return `
+                <div class="order-id">Commande #${order.id}</div>
+                <div class="order-user">Utilisateur: ${order.user.username}</div>
+                <div class="order-product">Produit: ${order.product.name}</div>
+                <div class="order-price">Prix: ${order.total_price}€</div>
+                <div class="order-time">${new Date(order.created_at).toLocaleString()}</div>
+            `;
+        }
+        
+        function displayRecentOrders(orders) {
+            if (orders.length === 0) {
+                ordersList.innerHTML = '<p>Aucune commande récente</p>';
+                return;
+            }
+            
+            ordersList.innerHTML = '';
+            orders.forEach(order => {
+                const orderElement = createOrderElement(order);
+                ordersList.appendChild(orderElement);
+            });
+            
+            stats.totalOrders = orders.length;
+            updateStats();
+        }
+        
+        function addNotification(notification) {
+            const notificationElement = document.createElement('div');
+            notificationElement.className = 'notification-item';
+            notificationElement.innerHTML = `
+                <div><strong>${notification.type}</strong></div>
+                <div>${notification.message}</div>
+                <div class="notification-time">${new Date().toLocaleString()}</div>
+            `;
+            
+            notificationsList.insertBefore(notificationElement, notificationsList.firstChild);
+            
+            // Limiter à 20 notifications
+            const notifications = notificationsList.querySelectorAll('.notification-item');
+            if (notifications.length > 20) {
+                notificationsList.removeChild(notifications[notifications.length - 1]);
+            }
+        }
+        
+        function addMLTaskNotification(task) {
+            const taskElement = document.createElement('div');
+            taskElement.className = `ml-task-item ${task.status === 'failed' ? 'ml-task-failed' : ''}`;
+            taskElement.innerHTML = `
+                <div><strong>Tâche ML: ${task.name}</strong></div>
+                <div>Statut: ${task.status}</div>
+                <div class="notification-time">${new Date().toLocaleString()}</div>
+            `;
+            
+            notificationsList.insertBefore(taskElement, notificationsList.firstChild);
+        }
+        
+        function updateStats() {
+            document.getElementById('totalOrders').textContent = stats.totalOrders;
+            document.getElementById('todayOrders').textContent = stats.todayOrders;
+            document.getElementById('activeUsers').textContent = stats.activeUsers;
+            document.getElementById('mlTasks').textContent = stats.mlTasks;
+        }
+        
+        function testConnection() {
+            if (socket && socket.readyState === WebSocket.OPEN) {
+                socket.send(JSON.stringify({type: 'ping'}));
+            } else {
+                connect();
+            }
+        }
+        
+        function getRecentOrders() {
+            if (socket && socket.readyState === WebSocket.OPEN) {
+                socket.send(JSON.stringify({type: 'get_recent_orders'}));
+            }
+        }
+        
+        function disconnect() {
+            if (reconnectTimeout) {
+                clearTimeout(reconnectTimeout);
+                reconnectTimeout = null;
+            }
+            
+            if (socket) {
+                socket.close();
+                socket = null;
+            }
+            
+            updateConnectionStatus('disconnected', 'Déconnecté manuellement');
+        }
+        
+        // Connexion automatique au chargement de la page
+        window.addEventListener('load', function() {
+            connect();
+        });
+        
+        // Reconnexion automatique si la page devient visible
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden && (!socket || socket.readyState !== WebSocket.OPEN)) {
+                connect();
+            }
+        });
+    </script>
+</body>
+</html>
+

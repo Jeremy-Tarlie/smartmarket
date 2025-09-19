@@ -142,3 +142,5 @@ class Command(BaseCommand):
             )
             raise CommandError(f'Échec de la construction des index: {e}')
 
+
+

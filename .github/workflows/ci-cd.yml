@@ -1,0 +1,283 @@
+name: CI/CD Pipeline - SmartMarket
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  # Job 1: Qualité du code
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install black ruff pytest pytest-cov pytest-django
+
+    - name: Lint with ruff
+      run: |
+        ruff check src/ --output-format=github
+
+    - name: Format check with black
+      run: |
+        black --check src/
+
+    - name: Run tests
+      run: |
+        cd src
+        python -m pytest --cov=. --cov-report=xml --cov-report=html
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./src/coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+
+  # Job 2: Build et scan des images Docker
+  build-and-scan:
+    runs-on: ubuntu-latest
+    needs: quality
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Log in to Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Extract metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=sha,prefix={{branch}}-
+          type=raw,value=latest,enable={{is_default_branch}}
+
+    - name: Build and push web image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./Dockerfile.web
+        push: true
+        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-web:${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Build and push worker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./Dockerfile.worker
+        push: true
+        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-worker:${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Build and push beat image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./Dockerfile.beat
+        push: true
+        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-beat:${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Build and push nginx image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./Dockerfile.nginx
+        push: true
+        tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-nginx:${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-web:${{ steps.meta.outputs.tags }}
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+
+    - name: Upload Trivy scan results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v2
+      if: always()
+      with:
+        sarif_file: 'trivy-results.sarif'
+
+  # Job 3: Déploiement
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [quality, build-and-scan]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    environment: production
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Deploy to production server
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.PROD_HOST }}
+        username: ${{ secrets.PROD_USER }}
+        key: ${{ secrets.PROD_SSH_KEY }}
+        port: ${{ secrets.PROD_PORT }}
+        script: |
+          # Variables d'environnement
+          export IMAGE_TAG=${{ github.sha }}
+          export REGISTRY=${{ env.REGISTRY }}
+          export IMAGE_NAME=${{ env.IMAGE_NAME }}
+          
+          # Créer le répertoire de l'application
+          mkdir -p /opt/smartmarket
+          cd /opt/smartmarket
+          
+          # Sauvegarde de la base de données
+          echo "Creating database backup..."
+          docker-compose -f docker-compose.prod.yaml exec -T db pg_dump -U $POSTGRES_USER $POSTGRES_DB > backup_$(date +%Y%m%d_%H%M%S).sql
+          
+          # Arrêter les services
+          echo "Stopping services..."
+          docker-compose -f docker-compose.prod.yaml down
+          
+          # Mettre à jour les images
+          echo "Pulling new images..."
+          docker pull $REGISTRY/$IMAGE_NAME-web:$IMAGE_TAG
+          docker pull $REGISTRY/$IMAGE_NAME-worker:$IMAGE_TAG
+          docker pull $REGISTRY/$IMAGE_NAME-beat:$IMAGE_TAG
+          docker pull $REGISTRY/$IMAGE_NAME-nginx:$IMAGE_TAG
+          
+          # Mettre à jour le docker-compose avec les nouvelles images
+          sed -i "s|image: .*web.*|image: $REGISTRY/$IMAGE_NAME-web:$IMAGE_TAG|g" docker-compose.prod.yaml
+          sed -i "s|image: .*worker.*|image: $REGISTRY/$IMAGE_NAME-worker:$IMAGE_TAG|g" docker-compose.prod.yaml
+          sed -i "s|image: .*beat.*|image: $REGISTRY/$IMAGE_NAME-beat:$IMAGE_TAG|g" docker-compose.prod.yaml
+          sed -i "s|image: .*nginx.*|image: $REGISTRY/$IMAGE_NAME-nginx:$IMAGE_TAG|g" docker-compose.prod.yaml
+          
+          # Démarrer les services
+          echo "Starting services..."
+          docker-compose -f docker-compose.prod.yaml up -d
+          
+          # Attendre que les services soient prêts
+          echo "Waiting for services to be ready..."
+          sleep 30
+          
+          # Vérifier la santé des services
+          echo "Checking service health..."
+          curl -f http://localhost/health/ready/ || exit 1
+          
+          # Nettoyer les anciennes images
+          echo "Cleaning up old images..."
+          docker image prune -f
+          
+          echo "Deployment completed successfully!"
+
+    - name: Health check after deployment
+      run: |
+        sleep 60
+        curl -f ${{ secrets.PROD_URL }}/health/ready/ || exit 1
+        echo "Health check passed!"
+
+  # Job 4: Tests de régression
+  regression-tests:
+    runs-on: ubuntu-latest
+    needs: deploy
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install requests
+
+    - name: Run API tests against production
+      run: |
+        python -c "
+        import requests
+        import time
+        
+        base_url = '${{ secrets.PROD_URL }}'
+        
+        # Test health endpoints
+        print('Testing health endpoints...')
+        response = requests.get(f'{base_url}/health/live/')
+        assert response.status_code == 200, f'Health live failed: {response.status_code}'
+        
+        response = requests.get(f'{base_url}/health/ready/')
+        assert response.status_code == 200, f'Health ready failed: {response.status_code}'
+        
+        # Test API endpoints
+        print('Testing API endpoints...')
+        response = requests.get(f'{base_url}/api/v1/products/')
+        assert response.status_code in [200, 401], f'Products API failed: {response.status_code}'
+        
+        print('All regression tests passed!')
+        "
+
+  # Job 5: Notification
+  notify:
+    runs-on: ubuntu-latest
+    needs: [deploy, regression-tests]
+    if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Notify deployment status
+      uses: 8398a7/action-slack@v3
+      if: always()
+      with:
+        status: ${{ job.status }}
+        channel: '#deployments'
+        webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+        fields: repo,message,commit,author,action,eventName,ref,workflow
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+
